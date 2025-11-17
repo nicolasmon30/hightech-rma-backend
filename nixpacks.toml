@@ -1,8 +1,0 @@
-[phases.setup]
-nixPkgs = ["python312", "file"]
-
-[phases.install]
-cmds = ["chmod +x prepare-env.sh && ./prepare-env.sh"]
-
-[start]
-cmd = "bash start.sh"
