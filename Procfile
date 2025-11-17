@@ -1,1 +1,1 @@
-web: bash -c "cd /app && python -c 'from alembic.config import main; main()' upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+web: bash start.sh
