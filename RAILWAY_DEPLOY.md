@@ -55,18 +55,35 @@ MAX_FILE_SIZE_MB=10
 3. **Configura las variables de entorno** (ver arriba)
 4. **Railway automáticamente:**
    - Ejecutará las migraciones (`alembic upgrade head`)
-   - Creará el superadmin (`python init_superadmin.py`)
    - Iniciará el servidor
 
-## 🔐 Credenciales del Superadmin
+## 🔐 Crear Superadmin
 
 Después del primer deploy:
-```
-Email:    nmonroy97@gmail.com
-Password: Admin2024!
-```
 
-**⚠️ IMPORTANTE:** Cambia la contraseña inmediatamente después del primer login.
+1. **Regístrate normalmente** en `https://tu-app.railway.app/api/v1/docs`
+   - Usa el endpoint `POST /api/v1/auth/register`
+
+2. **Cambia tu rol en la base de datos:**
+
+   **Opción A: Desde Railway Dashboard (PostgreSQL)**
+   ```sql
+   UPDATE users SET role = 'superadmin' WHERE email = 'tu-email@gmail.com';
+   ```
+
+   **Opción B: Desde terminal local (si tienes acceso)**
+   ```bash
+   # Conéctate a la BD de Railway
+   railway connect postgres
+   
+   # Ejecuta el UPDATE
+   UPDATE users SET role = 'superadmin' WHERE email = 'tu-email@gmail.com';
+   ```
+
+   **Opción C: Usando CLI de Railway**
+   ```bash
+   railway run psql $DATABASE_URL -c "UPDATE users SET role = 'superadmin' WHERE email = 'tu-email@gmail.com';"
+   ```
 
 ## 🔍 Verificar deploy
 

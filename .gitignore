@@ -13,6 +13,7 @@ ENV/
 # Variables de entorno (IMPORTANTE)
 .env
 .env.local
+# NO ignorar .env.railway (necesario para Railway build)
 
 # Docker volumes
 docker/
