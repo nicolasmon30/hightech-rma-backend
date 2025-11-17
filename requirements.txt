@@ -29,9 +29,8 @@ psycopg2-binary==2.9.9
 pyasn1==0.6.1
 pycparser==2.23
 pycryptodome==3.23.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
-pydantic_core==2.14.6
+pydantic==2.10.3
+pydantic-settings==2.6.1
 PyJWT==2.9.0
 python-dotenv==1.0.0
 python-jose==3.3.0
