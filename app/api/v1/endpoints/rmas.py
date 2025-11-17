@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.core.database import get_db
 from app.api.deps import (
@@ -61,12 +62,20 @@ async def create_rma(
         )
     
     # Crear RMA
-    rma = crud_rma.create_with_user(
-        db,
-        obj_in=rma_in,
-        user_id=current_user.id,
-        country_id=country_id
-    )
+    try:
+        rma = crud_rma.create_with_user(
+            db,
+            obj_in=rma_in,
+            user_id=current_user.id,
+            country_id=country_id
+        )
+    except IntegrityError as e:
+        db.rollback()
+        # Mensaje claro para serial duplicado (a nivel DB)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ya existe un item con el mismo serial_number en otro RMA. Cambia el serial o edita el RMA anterior."
+        ) from e
     
     # Serializar RMA para WebSocket
     rma_data = {

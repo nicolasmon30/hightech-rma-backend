@@ -2,7 +2,7 @@
 Modelo de Item de RMA
 Cada RMA puede tener múltiples items (productos)
 """
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Enum as SQLEnum, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -56,8 +56,12 @@ class RMAItem(Base):
     serial_number = Column(
         String(100),
         nullable=False,
-        unique=True,
         index=True
+    )
+
+    __table_args__ = (
+        # Unicidad por RMA: no permitir dos items con el mismo serial en el MISMO RMA
+        UniqueConstraint('rma_id', 'serial_number', name='uq_rmaitem_rma_serial'),
     )
     
     # ⭐ Tipo de servicio por item
