@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from app.crud.base import CRUDBase
 from app.models.rma import RMA, RMAStatus, RMAHistory
 from app.models.rma_item import RMAItem
@@ -276,6 +276,24 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
         Obtener RMAs por estado
         """
         return db.query(RMA).filter(RMA.status == status).all()
+
+    def get_by_number_with_relations(self, db: Session, *, rma_number: str) -> Optional[RMA]:
+        """Obtener un RMA por su número con relaciones (items, history) para uso público.
+        Excluye attachments por no ser públicos (pero no los carga explícitamente).
+        """
+        if not rma_number:
+            return None
+        return (
+            db.query(RMA)
+            .options(
+                selectinload(RMA.items).selectinload(RMAItem.brand),
+                selectinload(RMA.items).selectinload(RMAItem.product),
+                selectinload(RMA.items).selectinload(RMAItem.model),
+                selectinload(RMA.history)
+            )
+            .filter(RMA.rma_number == rma_number)
+            .first()
+        )
 
 
 rma = CRUDRMA(RMA)

@@ -1,5 +1,5 @@
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -20,17 +20,19 @@ from app.schemas.rma import (
 from app.models.user import User, UserRole
 from app.models.rma import RMAStatus, RMA
 from app.schemas.rma_history import RMAHistoryWithUser
+from app.core.websocket import manager
 
 router = APIRouter()
 
 
 @router.post("", response_model=RMAResponse, status_code=status.HTTP_201_CREATED)
-def create_rma(
+async def create_rma(
     *,
     db: Session = Depends(get_db),
     rma_in: RMACreate,
     country_id: int = Query(..., description="ID del país"),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    background_tasks: BackgroundTasks
 ) -> Any:
     """
     Crear nuevo RMA (USER/ADMIN/SUPERADMIN)
@@ -38,6 +40,10 @@ def create_rma(
     - USER: Puede crear RMAs para sus países asignados
     - ADMIN: Puede crear RMAs para sus países
     - SUPERADMIN: Puede crear RMAs para cualquier país
+    
+    **Notificaciones en tiempo real:**
+    - Se envía notificación WebSocket a SUPERADMIN (todos los RMAs)
+    - Se envía notificación WebSocket a ADMIN del país del RMA
     """
     # Verificar que el país existe
     country = crud_country.get(db, id=country_id)
@@ -61,6 +67,24 @@ def create_rma(
         user_id=current_user.id,
         country_id=country_id
     )
+    
+    # Serializar RMA para WebSocket
+    rma_data = {
+        "id": rma.id,
+        "rma_number": rma.rma_number,
+        "status": rma.status,
+        "company_name": rma.company_name,
+        "company_address": rma.company_address,
+        "postal_code": rma.postal_code,
+        "country_id": rma.country_id,
+        "country_name": rma.country.name if rma.country else None,
+        "created_by": rma.creator.email if rma.creator else None,
+        "created_at": rma.created_at.isoformat() if rma.created_at else None,
+        "total_items": len(rma.items) if rma.items else 0
+    }
+    
+    # Enviar notificación WebSocket en background
+    background_tasks.add_task(manager.notify_new_rma, rma_data, country_id)
     
     return rma
 
@@ -188,18 +212,22 @@ def get_rma(
 
 
 @router.put("/{rma_id}/status", response_model=RMAResponse)
-def update_rma_status(
+async def update_rma_status(
     *,
     db: Session = Depends(get_db),
     rma_id: int,
     status_update: RMAStatusUpdate,
-    current_user: User = Depends(get_current_admin)  # ADMIN/SUPERADMIN
+    current_user: User = Depends(get_current_admin),  # ADMIN/SUPERADMIN
+    background_tasks: BackgroundTasks
 ) -> Any:
     """
     Actualizar estado de RMA (ADMIN/SUPERADMIN)
     
     - ADMIN: Solo RMAs de su país
     - SUPERADMIN: Cualquier RMA
+    
+    **Notificaciones en tiempo real:**
+    - Se envía notificación WebSocket cuando cambia el estado
     """
     rma = crud_rma.get(db, id=rma_id)
     if not rma:
@@ -234,6 +262,26 @@ def update_rma_status(
         shipping_company=status_update.shipping_company,
         tracking_id=status_update.tracking_id
     )
+    
+    # Serializar RMA para WebSocket
+    rma_data = {
+        "id": rma.id,
+        "rma_number": rma.rma_number,
+        "status": rma.status,
+        "company_name": rma.company_name,
+        "company_address": rma.company_address,
+        "postal_code": rma.postal_code,
+        "country_id": rma.country_id,
+        "country_name": rma.country.name if rma.country else None,
+        "updated_by": current_user.email,
+        "updated_at": rma.updated_at.isoformat() if rma.updated_at else None,
+        "shipping_company": rma.shipping_company,
+        "tracking_id": rma.tracking_id,
+        "total_items": len(rma.items) if rma.items else 0
+    }
+    
+    # Enviar notificación WebSocket en background
+    background_tasks.add_task(manager.notify_rma_status_change, rma_data, rma.country_id)
     
     return rma
 
