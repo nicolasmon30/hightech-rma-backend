@@ -6,7 +6,7 @@ from datetime import datetime
 class CountryBase(BaseModel):
     """Campos base de Country"""
     name: str = Field(..., min_length=2, max_length=100, description="Nombre del país")
-    code: str = Field(..., min_length=2, max_length=2, description="Código ISO (US, CO)")
+    code: str = Field(..., min_length=3, max_length=3, description="Código ISO (USA, COL)")
 
 
 class CountryCreate(CountryBase):

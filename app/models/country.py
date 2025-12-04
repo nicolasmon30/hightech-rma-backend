@@ -15,7 +15,7 @@ class Country(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, nullable=False, index=True)  # "United States", "Colombia"
-    code = Column(String(2), unique=True, nullable=False, index=True)    # "US", "CO"
+    code = Column(String(3), unique=True, nullable=False, index=True)    # "USA", "COL"
     is_active = Column(Boolean, default=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
