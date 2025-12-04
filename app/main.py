@@ -15,6 +15,9 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     print("🚀 Iniciando HighTech RMA System...")
+    print(f"📋 BACKEND_CORS_ORIGINS raw: {settings.BACKEND_CORS_ORIGINS}")
+    print(f"🌐 CORS Origins parseados: {settings.cors_origins_list}")
+    print(f"🔧 Environment: {settings.ENVIRONMENT}")
     start_scheduler()
     
     yield
@@ -38,7 +41,7 @@ app = FastAPI(
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
