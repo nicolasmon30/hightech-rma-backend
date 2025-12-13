@@ -4,6 +4,7 @@ from sqlalchemy import or_
 from app.crud.base import CRUDBase
 from app.models.user import User, UserRole
 from app.models.country import Country
+from app.models.password_reset import PasswordResetToken
 from app.schemas.user import UserCreate, UserUpdate, UserCreateByAdmin, UserUpdateByAdmin
 from app.core.security import get_password_hash, verify_password
 from datetime import datetime
@@ -194,5 +195,21 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         """
         return user.is_active
 
+    
+    def delete(self, db: Session, *, id: int) -> Optional[User]:
+        """
+        Eliminar un usuario y sus tokens de reset de contraseña asociados
+        """
+        user = self.get(db, id=id)
+        if user:
+            # Primero eliminar todos los tokens de reset de contraseña del usuario
+            db.query(PasswordResetToken).filter(
+                PasswordResetToken.user_id == id
+            ).delete(synchronize_session=False)
+            
+            # Luego eliminar el usuario
+            db.delete(user)
+            db.commit()
+        return user
 
 user = CRUDUser(User)

@@ -1,0 +1,16 @@
+    
+    def delete(self, db: Session, *, id: int) -> Optional[User]:
+        '''
+        Eliminar un usuario y sus tokens de reset de contraseña asociados
+        '''
+        user = self.get(db, id=id)
+        if user:
+            # Primero eliminar todos los tokens de reset de contraseña del usuario
+            db.query(PasswordResetToken).filter(
+                PasswordResetToken.user_id == id
+            ).delete(synchronize_session=False)
+            
+            # Luego eliminar el usuario
+            db.delete(user)
+            db.commit()
+        return user
