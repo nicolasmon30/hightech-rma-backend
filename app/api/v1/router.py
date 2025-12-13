@@ -11,7 +11,8 @@ from app.api.v1.endpoints import (
     password_reset,
     shipping_companies,
     websocket,
-    public_tracking
+    public_tracking,
+    system_config
 )
 
 api_router = APIRouter()
@@ -28,3 +29,4 @@ api_router.include_router(rmas.router, prefix="/rmas", tags=["RMAs"])
 api_router.include_router(attachments.router, prefix="/rmas", tags=["RMA Attachments"])
 api_router.include_router(websocket.router, tags=["WebSocket"]) 
 api_router.include_router(public_tracking.router, prefix="/public", tags=["Public Tracking"])
+api_router.include_router(system_config.router, prefix="/system-config", tags=["System Configuration"])

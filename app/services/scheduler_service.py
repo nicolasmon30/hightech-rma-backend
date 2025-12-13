@@ -1,7 +1,7 @@
 """
 Servicio de programación de tareas automáticas
 Gestiona recordatorios de pago para RMAs en estado PAYMENT
-Configuración flexible a través de variables de entorno
+Configuración flexible a través de variables de entorno y base de datos
 """
 from datetime import datetime, timedelta
 from typing import Optional
@@ -13,11 +13,26 @@ from app.core.database import SessionLocal
 from app.core.config import settings
 from app.models.rma import RMA, RMAStatus
 from app.models.user import User
+from app.models.system_config import SystemConfig
 from app.services.email_service import EmailService
 
 # Instancia global del scheduler
 scheduler = BackgroundScheduler()
 email_service = EmailService()
+
+
+def get_config_value(db: Session, key: str, default_value: int) -> int:
+    """
+    Obtiene un valor de configuración desde la BD o usa el valor por defecto
+    """
+    try:
+        config = db.query(SystemConfig).filter(SystemConfig.key == key).first()
+        if config:
+            return int(config.value)
+    except Exception as e:
+        print(f"⚠️ Error obteniendo configuración {key}: {e}")
+    
+    return default_value
 
 
 def check_and_send_payment_reminders():
@@ -26,12 +41,16 @@ def check_and_send_payment_reminders():
     y envía recordatorios según el intervalo configurado
     
     Configuración:
-    - PAYMENT_REMINDER_INTERVAL_DAYS: Días entre recordatorios (default: 3)
+    - PAYMENT_REMINDER_INTERVAL_DAYS: Días entre recordatorios (desde BD o default: 3)
     """
     db: Session = SessionLocal()
     try:
-        # Obtener intervalo configurado
-        reminder_interval_days = settings.PAYMENT_REMINDER_INTERVAL_DAYS
+        # Obtener intervalo configurado desde BD o usar default
+        reminder_interval_days = get_config_value(
+            db, 
+            "PAYMENT_REMINDER_INTERVAL_DAYS", 
+            settings.PAYMENT_REMINDER_INTERVAL_DAYS
+        )
         
         # Buscar todos los RMAs en estado PAYMENT
         rmas_pending_payment = db.query(RMA).filter(
@@ -98,11 +117,21 @@ def start_scheduler():
     Se ejecuta al iniciar la aplicación
     
     Configuración:
-    - PAYMENT_REMINDER_CHECK_INTERVAL_HOURS: Frecuencia de verificación (default: 24)
+    - PAYMENT_REMINDER_CHECK_INTERVAL_HOURS: Frecuencia de verificación (desde BD o default: 24)
+    
+    Nota: Los cambios de configuración se aplicarán en el próximo reinicio del scheduler
     """
     if not scheduler.running:
-        # Obtener intervalo configurado (en horas)
-        check_interval_hours = settings.PAYMENT_REMINDER_CHECK_INTERVAL_HOURS
+        db = SessionLocal()
+        try:
+            # Obtener intervalo configurado desde BD o usar default
+            check_interval_hours = get_config_value(
+                db,
+                "PAYMENT_REMINDER_CHECK_INTERVAL_HOURS",
+                settings.PAYMENT_REMINDER_CHECK_INTERVAL_HOURS
+            )
+        finally:
+            db.close()
         
         # Programar tarea según configuración
         scheduler.add_job(
@@ -115,7 +144,18 @@ def start_scheduler():
         )
         
         scheduler.start()
-        print(f"🕐 Scheduler iniciado: recordatorios cada {check_interval_hours}h, intervalo de envío {settings.PAYMENT_REMINDER_INTERVAL_DAYS} días")
+        print(f"🕐 Scheduler iniciado: recordatorios cada {check_interval_hours}h")
+
+
+def restart_scheduler():
+    """
+    Reiniciar el scheduler para aplicar nuevas configuraciones
+    Debe ser llamado después de actualizar configuraciones en BD
+    """
+    print("🔄 Reiniciando scheduler para aplicar nueva configuración...")
+    stop_scheduler()
+    start_scheduler()
+    print("✅ Scheduler reiniciado con nueva configuración")
 
 
 def stop_scheduler():

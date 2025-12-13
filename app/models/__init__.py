@@ -9,6 +9,7 @@ from app.models.rma import RMA, RMAStatus
 from app.models.rma_attachment import RMAAttachment, AttachmentType
 from app.models.password_reset import PasswordResetToken
 from app.models.shipping_company import ShippingCompany
+from app.models.system_config import SystemConfig
 
 # Esto asegura que SQLAlchemy conozca todos los modelos
 __all__ = [
@@ -30,4 +31,5 @@ __all__ = [
     "AttachmentType",
     "PasswordResetToken",
     "ShippingCompany",
+    "SystemConfig",
 ]

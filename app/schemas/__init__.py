@@ -29,6 +29,15 @@ from app.schemas.attachment import (
     AttachmentListItem
 )
 
+# Schemas de configuración del sistema
+from app.schemas.system_config import (
+    SystemConfigCreate,
+    SystemConfigUpdate,
+    SystemConfigResponse,
+    PaymentReminderConfigUpdate,
+    PaymentReminderConfigResponse
+)
+
 __all__ = [
     # Countries
     "CountryCreate",
@@ -74,4 +83,11 @@ __all__ = [
     "AttachmentResponse",
     "AttachmentHistory",
     "AttachmentListItem",
+    
+    # System Config
+    "SystemConfigCreate",
+    "SystemConfigUpdate",
+    "SystemConfigResponse",
+    "PaymentReminderConfigUpdate",
+    "PaymentReminderConfigResponse",
 ]
