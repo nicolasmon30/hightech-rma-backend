@@ -149,13 +149,36 @@ def start_scheduler():
 
 def restart_scheduler():
     """
-    Reiniciar el scheduler para aplicar nuevas configuraciones
+    Reconfigurar el scheduler para aplicar nuevas configuraciones
     Debe ser llamado después de actualizar configuraciones en BD
+    
+    En lugar de reiniciar completamente, solo reconfigura el job existente
     """
-    print("🔄 Reiniciando scheduler para aplicar nueva configuración...")
-    stop_scheduler()
-    start_scheduler()
-    print("✅ Scheduler reiniciado con nueva configuración")
+    if not scheduler.running:
+        print("⚠️ Scheduler no está corriendo, iniciando...")
+        start_scheduler()
+        return
+    
+    print("🔄 Reconfigurando scheduler con nueva configuración...")
+    
+    db = SessionLocal()
+    try:
+        # Obtener nueva configuración desde BD
+        check_interval_hours = get_config_value(
+            db,
+            "PAYMENT_REMINDER_CHECK_INTERVAL_HOURS",
+            settings.PAYMENT_REMINDER_CHECK_INTERVAL_HOURS
+        )
+    finally:
+        db.close()
+    
+    # Reconfigurar el job existente con el nuevo intervalo
+    scheduler.reschedule_job(
+        'payment_reminders',
+        trigger=IntervalTrigger(hours=check_interval_hours)
+    )
+    
+    print(f"✅ Scheduler reconfigurado: recordatorios cada {check_interval_hours}h")
 
 
 def stop_scheduler():

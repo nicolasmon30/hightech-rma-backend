@@ -61,6 +61,8 @@ def update_payment_reminder_config(
     
     Nota: El scheduler se reiniciará automáticamente para aplicar los cambios
     """
+    print(f"📝 PUT recibido - Días: {config_update.payment_reminder_interval_days}, Horas: {config_update.payment_reminder_check_interval_hours}")
+    
     # Actualizar intervalo de días
     interval_config = system_config.update_by_key(
         db,
@@ -95,11 +97,19 @@ def update_payment_reminder_config(
             )
         )
     
-    # Reiniciar scheduler para aplicar cambios inmediatamente
+    print(f"💾 Configuración guardada en BD")
+    
+    # Reconfigurar scheduler para aplicar cambios inmediatamente
     try:
+        print(f"🔧 Llamando a restart_scheduler()...")
         scheduler_service.restart_scheduler()
+        print(f"✅ Configuración actualizada - Días: {config_update.payment_reminder_interval_days}, Horas: {config_update.payment_reminder_check_interval_hours}")
     except Exception as e:
-        print(f"⚠️ Error reiniciando scheduler: {e}")
+        print(f"⚠️ Error reconfigurando scheduler: {e}")
+        import traceback
+        traceback.print_exc()
+        # No fallar la petición si el scheduler tiene problemas
+        # Los nuevos valores se aplicarán en el próximo reinicio del servidor
     
     return PaymentReminderConfigResponse(
         payment_reminder_interval_days=int(interval_config.value),
