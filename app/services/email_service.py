@@ -763,6 +763,9 @@ class EmailService:
         t = EmailService._get_translation(language, "rma_created")
         subject = f"{t['subject_prefix']} {company_name}"
         
+        rma_url = f"{settings.FRONTEND_URL}/rma"
+        view_button_text = "Ver mis RMAs" if language == "es" else "View My RMAs"
+        
         html = f"""
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -789,6 +792,13 @@ class EmailService:
                     </ol>
                     
                     <p>{t["notifications"]}</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{rma_url}" 
+                           style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {view_button_text}
+                        </a>
+                    </div>
                     
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
@@ -823,6 +833,9 @@ class EmailService:
         """
         t = EmailService._get_translation(language, "rma_approved")
         subject = f"{t['subject_prefix']} {rma_number}"
+        
+        rma_url = f"{settings.FRONTEND_URL}/rma"
+        view_button_text = "Ver mis RMAs" if language == "es" else "View My RMAs"
         
         comment_section = ""
         if comment:
@@ -864,6 +877,13 @@ class EmailService:
                         <li>{t["step_3"]}</li>
                     </ul>
                     
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{rma_url}" 
+                           style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {view_button_text}
+                        </a>
+                    </div>
+                    
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
                     </p>
@@ -898,6 +918,9 @@ class EmailService:
         t = EmailService._get_translation(language, "rma_rejected")
         subject = f"{t['subject_prefix']} {company_name}"
         
+        rma_url = f"{settings.FRONTEND_URL}/rma"
+        view_button_text = "Ver mis RMAs" if language == "es" else "View My RMAs"
+        
         html = f"""
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -923,6 +946,13 @@ class EmailService:
                     </ul>
                     
                     <p>{t["help"]}</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{rma_url}" 
+                           style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {view_button_text}
+                        </a>
+                    </div>
                     
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
@@ -1014,6 +1044,13 @@ class EmailService:
                         <li>{t["access_3"]}</li>
                     </ol>
                     
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{settings.FRONTEND_URL}/rma" 
+                           style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {"Ver mis RMAs" if language == "es" else "View My RMAs"}
+                        </a>
+                    </div>
+                    
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
                     </p>
@@ -1091,6 +1128,13 @@ class EmailService:
                     
                     <p>{t["notification"]}</p>
                     
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{settings.FRONTEND_URL}/rma" 
+                           style="background-color: #06b6d4; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {"Ver mis RMAs" if language == "es" else "View My RMAs"}
+                        </a>
+                    </div>
+                    
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
                     </p>
@@ -1166,6 +1210,13 @@ class EmailService:
                     </ul>
                     
                     <p>{t["hope"]}</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{settings.FRONTEND_URL}/rma" 
+                           style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {"Ver mis RMAs" if language == "es" else "View My RMAs"}
+                        </a>
+                    </div>
                     
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
@@ -1250,6 +1301,13 @@ class EmailService:
                     {comment_section}
                     
                     <p>{t["details"]}</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{settings.FRONTEND_URL}/rma" 
+                           style="background-color: {color}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {"Ver mis RMAs" if language == "es" else "View My RMAs"}
+                        </a>
+                    </div>
                     
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
@@ -1340,6 +1398,13 @@ class EmailService:
                     </p>
                     
                     <p>{t["questions"]}</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{settings.FRONTEND_URL}/rma" 
+                           style="background-color: {urgency_color}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                            {"Ver mis RMAs" if language == "es" else "View My RMAs"}
+                        </a>
+                    </div>
                     
                     <p style="margin-top: 30px;">
                         <strong>{t["signature"]}</strong>
