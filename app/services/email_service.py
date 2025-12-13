@@ -110,6 +110,8 @@ EMAIL_TRANSLATIONS = {
             "step_1": "Prepara los productos según las instrucciones",
             "step_2": "Espera indicaciones de envío",
             "step_3": "Mantén este número a mano para consultas",
+            "copy_instructions_1": "Por favor envía tu equipo a la siguiente dirección utilizando la transportadora de tu preferencia.",
+            "copy_instructions_2": "Además, imprime una copia en papel del formulario RMA e inclúyela en la caja con tu equipo. ¡Esto nos ayudará a identificar tu equipo!",
             "signature": "Equipo HighTech RMA"
         },
         "rma_rejected": {
@@ -319,6 +321,8 @@ EMAIL_TRANSLATIONS = {
             "step_1": "Prepare the products according to the instructions",
             "step_2": "Wait for shipping instructions",
             "step_3": "Keep this number handy for inquiries",
+            "copy_instructions_1": "Please send your equipment to the following address below via your carrier of choice.",
+            "copy_instructions_2": "Also, please print out a paper copy of the RMA form, and include in the box with your equipment – This will help us identify your equipment!",
             "signature": "HighTech RMA Team"
         },
         "rma_rejected": {
@@ -876,6 +880,19 @@ class EmailService:
                         <li>{t["step_2"]}</li>
                         <li>{t["step_3"]}</li>
                     </ul>
+                    <p>
+                        {t["copy_instructions_1"]}
+                    </p>
+                    <p>
+                        {t["copy_instructions_2"]}
+                    </p>
+                    <p>
+                        High Tech Supplies, Inc.<br>
+                        12601 NW 115 Ave, Building A<br>
+                        Unit 114<br>
+                        Medley FL 33178<br>
+                        USA
+                    </p>
                     
                     <div style="text-align: center; margin: 30px 0;">
                         <a href="{rma_url}" 
