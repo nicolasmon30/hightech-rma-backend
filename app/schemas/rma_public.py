@@ -6,6 +6,7 @@ from typing import List, Optional
 from datetime import datetime
 from app.models.rma import RMAStatus
 from app.models.rma_item import ServiceType
+from app.core.utils import get_rma_status_display
 
 
 class RMAPublicItem(BaseModel):
@@ -56,17 +57,15 @@ class RMAPublicResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
     @staticmethod
-    def status_display_name(status: RMAStatus) -> str:
-        mapping = {
-            RMAStatus.RMA_SUBMITTED: "Solicitud Enviada",
-            RMAStatus.AWAITING_GOODS: "Esperando Productos",
-            RMAStatus.EVALUATING: "En Evaluación",
-            RMAStatus.PROCESSING: "En Procesamiento",
-            RMAStatus.PAYMENT: "Pago Pendiente",
-            RMAStatus.IN_SHIPPING: "En Envío",
-            RMAStatus.APPROVED: "Aprobado",
-            RMAStatus.REJECTED: "Rechazado",
-            RMAStatus.IN_REPAIR: "En Reparación",
-            RMAStatus.COMPLETED: "Completado",
-        }
-        return mapping.get(status, status.value)
+    def status_display_name(status: RMAStatus, language: str = "es") -> str:
+        """
+        Obtener el nombre traducido del estado
+        
+        Args:
+            status: Estado del RMA
+            language: Código de idioma ('es' o 'en'), por defecto 'es' para retrocompatibilidad
+        
+        Returns:
+            Nombre del estado traducido
+        """
+        return get_rma_status_display(status, language)

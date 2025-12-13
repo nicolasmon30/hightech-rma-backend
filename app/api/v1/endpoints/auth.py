@@ -50,7 +50,8 @@ def register(
     try:
         email_service.send_welcome_email(
             user_email=user.email,
-            user_name=user.full_name
+            user_name=user.full_name,
+            language=user.language.value  # Usar el idioma del usuario
         )
     except Exception as e:
         # No fallar el registro si el email falla

@@ -5,7 +5,7 @@ from app.models.rma import RMA, RMAStatus, RMAHistory
 from app.models.rma_item import RMAItem
 from app.models.user import User, UserRole
 from app.schemas.rma import RMACreate, RMAUpdate
-from app.core.utils import generate_rma_number
+from app.core.utils import generate_rma_number, get_rma_status_display
 from app.services.email_service import email_service
 
 
@@ -75,7 +75,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
                     user_name=user.full_name,
                     company_name=db_obj.company_name,
                     items_count=len(db_obj.items),
-                    rma_id=db_obj.id
+                    rma_id=db_obj.id,
+                    language=user.language.value
                 )
         except Exception as e:
             print(f"⚠️ Error enviando email de RMA creado: {e}")
@@ -152,21 +153,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
             if not user:
                 return
             
-            # Mapeo de estados a nombres legibles
-            status_display_names = {
-                RMAStatus.RMA_SUBMITTED: "Solicitud Enviada",
-                RMAStatus.AWAITING_GOODS: "Esperando Productos",
-                RMAStatus.EVALUATING: "En Evaluación",
-                RMAStatus.PROCESSING: "En Procesamiento",
-                RMAStatus.PAYMENT: "Pago Pendiente",
-                RMAStatus.IN_REPAIR: "En Reparación",
-                RMAStatus.APPROVED: "Aprobado",
-                RMAStatus.REJECTED: "Rechazado",
-                RMAStatus.IN_SHIPPING: "En Envío",
-                RMAStatus.COMPLETED: "Completado"
-            }
-            
-            status_display = status_display_names.get(new_status, new_status.value)
+            # Obtener nombre del estado en el idioma del usuario
+            status_display = get_rma_status_display(new_status, user.language.value)
             
             # Estados con emails específicos (mantener los existentes)
             if new_status == RMAStatus.APPROVED:
@@ -175,7 +163,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
                     user_name=user.full_name,
                     rma_number=rma.rma_number,
                     company_name=rma.company_name,
-                    comment=comment
+                    comment=comment,
+                    language=user.language.value
                 )
             
             elif new_status == RMAStatus.REJECTED:
@@ -185,7 +174,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
                     user_name=user.full_name,
                     company_name=rma.company_name,
                     rma_id=rma.id,
-                    reason=reason
+                    reason=reason,
+                    language=user.language.value
                 )
             
             elif new_status == RMAStatus.IN_SHIPPING:
@@ -196,7 +186,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
                         rma_number=rma.rma_number or f"RMA #{rma.id}",
                         company_name=rma.company_name,
                         shipping_company=rma.shipping_company,
-                        tracking_id=rma.tracking_id
+                        tracking_id=rma.tracking_id,
+                        language=user.language.value
                     )
                 else:
                     # Si no hay datos de shipping, enviar email genérico
@@ -207,7 +198,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
                         company_name=rma.company_name,
                         new_status=new_status.value,
                         status_display=status_display,
-                        comment=comment
+                        comment=comment,
+                        language=user.language.value
                     )
             
             elif new_status == RMAStatus.COMPLETED:
@@ -216,7 +208,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
                     user_name=user.full_name,
                     rma_number=rma.rma_number or f"RMA #{rma.id}",
                     company_name=rma.company_name,
-                    comment=comment
+                    comment=comment,
+                    language=user.language.value
                 )
             
             # TODOS los demás estados: enviar email genérico
@@ -228,7 +221,8 @@ class CRUDRMA(CRUDBase[RMA, RMACreate, RMAUpdate]):
                     company_name=rma.company_name,
                     new_status=new_status.value,
                     status_display=status_display,
-                    comment=comment
+                    comment=comment,
+                    language=user.language.value
                 )
         
         except Exception as e:

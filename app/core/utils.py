@@ -1,7 +1,52 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.models.rma import RMA
+from app.models.rma import RMA, RMAStatus
 from app.models.country import Country
+from typing import Dict
+
+
+# Traducciones de estados de RMA
+RMA_STATUS_TRANSLATIONS: Dict[str, Dict[RMAStatus, str]] = {
+    "es": {
+        RMAStatus.RMA_SUBMITTED: "Solicitud Enviada",
+        RMAStatus.AWAITING_GOODS: "Esperando Productos",
+        RMAStatus.EVALUATING: "En Evaluación",
+        RMAStatus.PROCESSING: "En Procesamiento",
+        RMAStatus.PAYMENT: "Pago Pendiente",
+        RMAStatus.IN_REPAIR: "En Reparación",
+        RMAStatus.APPROVED: "Aprobado",
+        RMAStatus.REJECTED: "Rechazado",
+        RMAStatus.IN_SHIPPING: "En Envío",
+        RMAStatus.COMPLETED: "Completado"
+    },
+    "en": {
+        RMAStatus.RMA_SUBMITTED: "Request Submitted",
+        RMAStatus.AWAITING_GOODS: "Awaiting Products",
+        RMAStatus.EVALUATING: "Under Evaluation",
+        RMAStatus.PROCESSING: "Processing",
+        RMAStatus.PAYMENT: "Pending Payment",
+        RMAStatus.IN_REPAIR: "Under Repair",
+        RMAStatus.APPROVED: "Approved",
+        RMAStatus.REJECTED: "Rejected",
+        RMAStatus.IN_SHIPPING: "In Transit",
+        RMAStatus.COMPLETED: "Completed"
+    }
+}
+
+
+def get_rma_status_display(status: RMAStatus, language: str = "en") -> str:
+    """
+    Obtener el nombre traducido de un estado de RMA
+    
+    Args:
+        status: Estado del RMA (enum)
+        language: Código de idioma ('es' o 'en')
+    
+    Returns:
+        Nombre del estado traducido
+    """
+    lang = language.lower() if language.lower() in ["es", "en"] else "en"
+    return RMA_STATUS_TRANSLATIONS.get(lang, RMA_STATUS_TRANSLATIONS["en"]).get(status, status.value)
 
 
 def generate_rma_number(db: Session, country_id: int) -> str:

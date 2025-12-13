@@ -67,7 +67,8 @@ def request_password_reset(
                 user_email=user.email,
                 user_name=user.full_name,
                 reset_token=reset_token.token,
-                reset_url=reset_url
+                reset_url=reset_url,
+                language=user.language.value
             )
             print(f"✅ Email de recuperación enviado a {user.email}")
         except Exception as e:

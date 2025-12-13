@@ -107,7 +107,8 @@ async def upload_attachment(
                 attachment_type=attachment_type.value,
                 comment=description,
                 file_content=file_content,
-                file_name=file.filename
+                file_name=file.filename,
+                language=creator.language.value
             )
             print(f"✅ Email de adjunto enviado a {creator.email} con PDF adjunto")
     except Exception as e:
@@ -167,7 +168,8 @@ async def replace_attachment(
                 attachment_type=new_version.attachment_type.value,
                 comment=f"Documento actualizado (v{new_version.version}). {description or ''}",
                 file_content=file_content,
-                file_name=file.filename
+                file_name=file.filename,
+                language=creator.language.value
             )
             print(f"✅ Email de actualización de adjunto enviado a {creator.email} con PDF adjunto")
     except Exception as e:

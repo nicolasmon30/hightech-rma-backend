@@ -198,7 +198,8 @@ def create_user(
             user_email=user.email,
             user_name=user.full_name,
             user_role=user.role.value,
-            temp_password=temp_password
+            temp_password=temp_password,
+            language=user.language.value
         )
     except Exception as e:
         # No fallar si el email no se puede enviar

@@ -93,7 +93,8 @@ def check_and_send_payment_reminders():
                             user_name=user.full_name,
                             rma_number=rma.rma_number or f"RMA #{rma.id}",
                             company_name=rma.company_name,
-                            days_pending=days_passed
+                            days_pending=days_passed,
+                            language=user.language.value
                         )
                         
                         # Actualizar fecha del último recordatorio
